@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { StyleSheet, Text, View, SafeAreaView, Alert, FlatList } from "react-native";
+import { StyleSheet, View, Alert, FlatList, useWindowDimensions } from "react-native";
 import Title from "../components/ui/Title";
 import NumberContainer from "../components/game/NumberContainer";
 import PrimaryButton from "../components/ui/PrimaryButton";
@@ -26,6 +26,7 @@ const GameScreen = ({userNumber,onGameOver,roundNumber}) =>{
     const initialGuess = generateRandomBetween(1,100, userNumber);
     const [currentGuess, setCurrentGuess] = useState(initialGuess);
     const [guessRounds, setGuessRounds] = useState([initialGuess]);
+    const {height, width} = useWindowDimensions();
 
     useEffect(()=>{
         if(currentGuess === userNumber)
@@ -55,11 +56,9 @@ const GameScreen = ({userNumber,onGameOver,roundNumber}) =>{
     }
 
     const guessRoundListLength = guessRounds.length;
-
-    return (
-        <View style={styles.screen}>
-             <Title>Opponent's Guess</Title>
-             <NumberContainer>{currentGuess}</NumberContainer>
+    let content = 
+    (<>
+            <NumberContainer>{currentGuess}</NumberContainer>
             <View>
                 <Card>
                     <TextInstruction style={styles.instructionText}>Higher or lower ?</TextInstruction>
@@ -73,6 +72,28 @@ const GameScreen = ({userNumber,onGameOver,roundNumber}) =>{
                     </View>
                 </Card>
             </View>
+        </>);
+
+    if(width > 500){
+        content = 
+        <>
+            <View style={styles.buttonContainerWide}>
+                <View style={styles.btnContainer}>
+                    <PrimaryButton onPress={nextGuessHandler.bind(this,'lower')}><Ionicons name="md-remove-circle-sharp" size={24} color="white"/></PrimaryButton>
+                </View>
+                <NumberContainer>{currentGuess}</NumberContainer>
+                <View style={styles.btnContainer}>
+                    <PrimaryButton onPress={nextGuessHandler.bind(this,'greater')}><Ionicons name="md-add-circle-sharp" size={24} color="white"/></PrimaryButton>
+                </View>
+            </View>
+           
+        </>
+    }
+
+    return (
+        <View style={styles.screen}>
+             <Title>Opponent's Guess</Title>
+             {content}
             <View style={styles.listContainer}>
                 <FlatList data={guessRounds} 
                 renderItem={(itemData) => <GuessLogItem key={itemData.index} roundNumber={guessRoundListLength - itemData.index} guess={itemData.item}/>}
@@ -86,10 +107,15 @@ const GameScreen = ({userNumber,onGameOver,roundNumber}) =>{
 const styles = StyleSheet.create({
     screen: {
         flex: 1,
-        padding: 24
+        padding: 24,
+        alignItems: "center"
     },
     buttonContainer:{
         flexDirection: 'row'
+    },
+    buttonContainerWide:{
+        flexDirection: 'row',
+        alignItems: 'center'
     },
     btnContainer:{
         flex: 1
@@ -97,6 +123,7 @@ const styles = StyleSheet.create({
     instructionText:{
         marginBottom:12
     },
+    
     listContainer:{
         flex: 1,
         padding: 16
